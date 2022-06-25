@@ -1,6 +1,8 @@
 name: CI
-on: 
+on:
   pull_request:
+    branches: [develop]
+  push:
     branches: [develop]
 
 jobs:
@@ -16,5 +18,16 @@ jobs:
       - run: npm ci
       - run: npm run format:check
       - run: npm test -- --coverage
-        env: 
-          CI: true          
+        env:
+          CI: true
+
+      - name: Build Project
+        if: github.event_name == 'push'
+        run: npm run build
+
+      - name: Deploy Project
+        if: github.event_name == 'push'
+        run: npx surge --project  ./build --domain learn-react-rachit.surge.sh
+        env:
+          SURGE_LOGIN: ${{secrets.SURGE_EMAIL}}
+          SURGE_TOKEN: ${{secrets.SURGE_TOKEN}}
